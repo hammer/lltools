@@ -10,7 +10,7 @@ DATABASE = ''
 # JH: not sure why the CSRF token is required, but can't get logins to work without it.
 CSRFTOKEN = 'a'
 LOGIN_URL = 'http://www.memrise.com/login/'
-FIELD_SEPARATOR = '|' # TODO(hammer): escape field separator
+FIELD_SEPARATOR = '|' 
 
 
 def fetch_content():
@@ -20,15 +20,18 @@ def fetch_content():
   cookie_data = {'csrftoken': CSRFTOKEN}
 
   session = requests.session()
-  session.post(URL, data=login_data, cookies=cookie_data)
+  session.post(LOGIN_URL, data=login_data, cookies=cookie_data)
 
   page_number = 0
   while (True):
     page_number += 1
     req = session.get(DATABASE + '?page=%d' % page_number)
     this_page = req.text
+
     with open('page%s.html' % page_number, 'w') as ofile:
       ofile.write(this_page)
+
+    # Detect if we're at the end of a database
     if 'Next' not in html.fromstring(this_page).xpath(XPATH_PAGINATION)[-1]:
       break
 
@@ -51,6 +54,7 @@ def parse_content():
     except:
       break
 
+  # TODO(hammer): escape field separator
   with open('all_things.csv', 'w') as ofile:
     ofile.write('\n'.join([FIELD_SEPARATOR.join(thing) for thing in all_things]))
 
