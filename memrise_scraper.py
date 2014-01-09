@@ -1,3 +1,4 @@
+import argparse
 import configparser
 import logging
 from lxml import html
@@ -9,10 +10,6 @@ CSRFTOKEN = 'a'
 LOGIN_URL = 'http://www.memrise.com/login/'
 FIELD_SEPARATOR = '|'
 CONFIGURATION_FILE = 'memrise_scraper.ini'
-
-# Set logging level
-# TODO(hammer): allows this to be configurable with -v/--verbose command line flag
-logging.basicConfig(level=logging.DEBUG)
 
 
 def parse_configuration(configuration_file=CONFIGURATION_FILE):
@@ -78,6 +75,13 @@ def parse_content():
 
 
 if __name__ == "__main__":
+  # CLI argument handling
+  parser = argparse.ArgumentParser(description='Scrape vocabulary from Memrise.')
+  parser.add_argument('-v', '--verbose', action='store_true')
+  args = parser.parse_args()
+  if args.verbose: logging.basicConfig(level=logging.DEBUG)
+
+  # Do some work
   username, password, databases = parse_configuration()
   fetch_content(username, password, databases)
   parse_content()
