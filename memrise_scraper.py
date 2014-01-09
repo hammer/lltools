@@ -1,4 +1,5 @@
 import configparser
+import logging
 from lxml import html
 import requests
 
@@ -8,6 +9,10 @@ CSRFTOKEN = 'a'
 LOGIN_URL = 'http://www.memrise.com/login/'
 FIELD_SEPARATOR = '|'
 CONFIGURATION_FILE = 'memrise_scraper.ini'
+
+# Set logging level
+# TODO(hammer): allows this to be configurable with -v/--verbose command line flag
+logging.basicConfig(level=logging.DEBUG)
 
 
 def parse_configuration(configuration_file=CONFIGURATION_FILE):
@@ -29,8 +34,7 @@ def fetch_content(username, password, databases):
     page_number = 0
     while (True):
       page_number += 1
-      # TODO(hammer): using logging module
-      print('Processing database %s, page %d' % (database, page_number))
+      logging.info('Processing database %s, page %d' % (database, page_number))
       req = session.get(database + '?page=%d' % page_number)
       this_page = req.text
 
@@ -53,7 +57,7 @@ def parse_content():
     all_things = []
     while (True):
       page_number += 1
-      print('Processing database %s, page %d' % (database_number, page_number))
+      logging.info('Processing database %s, page %d' % (database_number, page_number))
       try:
         with open('database%dpage%d.html' % (database_number, page_number)) as infile:
           tree = html.fromstring(infile.read())
