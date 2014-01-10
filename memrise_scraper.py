@@ -2,6 +2,7 @@ import argparse
 import configparser
 import logging
 from lxml import html
+import os
 import requests
 
 # Constants
@@ -75,14 +76,34 @@ def parse_content():
 
 
 if __name__ == "__main__":
-  # CLI argument handling
+  # First, look for configuration parameters in the environment
+  username = os.environ.get('MEMRISE_USERNAME', '')
+  password = os.environ.get('MEMRISE_PASSWORD', '')
+  databases = os.environ.get('MEMRISE_DATABASES').split(',') if os.environ.get('MEMRISE_DATABASES', False) else []
+
+  # Second, look for configuration parameters in a configuration file (in this directory)
+  config = configparser.ConfigParser()
+  config.read('memrise_scraper.ini')
+  if config.has_section('memrise.com'):
+    config_dict = config['memrise.com']
+    username = config_dict.get('username', username)
+    password = config_dict.get('password', password)
+    databases = config_dict.get('databases').split(',') if config_dict.get('databases', False) else databases
+
+  # Third, look for configuration parameters on the command line
   parser = argparse.ArgumentParser(description='Scrape vocabulary from Memrise.')
+  parser.add_argument('-u', '--username')
+  parser.add_argument('-p', '--password')
+  parser.add_argument('-d', '--databases', nargs='+')
   parser.add_argument('-v', '--verbose', action='store_true')
   args = parser.parse_args()
+  if args.username is not None: username = args.username
+  if args.password is not None: password = args.password
+  if args.databases is not None: databases = args.databases.split(',')
   if args.verbose: logging.basicConfig(level=logging.DEBUG)
 
   # Do some work
-  username, password, databases = parse_configuration()
+  logging.info('Fetching content with username %s, password %s, and databases %s' % (username, password, databases))
   fetch_content(username, password, databases)
   parse_content()
 
