@@ -11,12 +11,7 @@ CSRFTOKEN = 'a'
 LOGIN_URL = 'http://www.memrise.com/login/'
 FIELD_SEPARATOR = '|'
 CONFIGURATION_FILE = 'memrise_scraper.ini'
-
-
-def parse_configuration(configuration_file=CONFIGURATION_FILE):
-  config = configparser.ConfigParser()
-  config.read('memrise_scraper.ini')
-  return config['DEFAULT']['username'], config['DEFAULT']['password'], config['DEFAULT']['databases'].split(',')
+CONFIGURATION_FILE = 'memrise.com'
 
 
 def fetch_content(username, password, databases):
@@ -83,9 +78,9 @@ if __name__ == "__main__":
 
   # Second, look for configuration parameters in a configuration file (in this directory)
   config = configparser.ConfigParser()
-  config.read('memrise_scraper.ini')
-  if config.has_section('memrise.com'):
-    config_dict = config['memrise.com']
+  config.read(CONFIGURATION_FILE)
+  if config.has_section(CONFIGURATION_SECTION):
+    config_dict = config[CONFIGURATION_SECTION]
     username = config_dict.get('username', username)
     password = config_dict.get('password', password)
     databases = config_dict.get('databases').split(',') if config_dict.get('databases', False) else databases
