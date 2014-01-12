@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+<table>
+{% for thing in things %}
+  <tr>
+  {% for field in thing %}
+    <td>{{field}}</td>
+  {% endfor %}
+  </tr>
+{% endfor %}
+</table>
+{% endblock %}
