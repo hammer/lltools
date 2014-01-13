@@ -1,12 +1,11 @@
-from flask import Flask, g, render_template
+from flask import g, render_template
 import psycopg2
+
+from memrise_scrape_viewer import app
 
 # Configuration
 DATABASE_NAME = 'memrise'
 DEBUG = True
-
-app = Flask(__name__)
-app.config.from_object(__name__)
 
 
 # Helper functions for interacting with the database
@@ -38,6 +37,3 @@ def index():
   return render_template('index.html', things=things)
 
 
-# Main
-if __name__ == '__main__':
-  app.run()
