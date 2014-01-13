@@ -1,6 +1,6 @@
 from flask import g, render_template
 import psycopg2
-
+from psycopg2.extras import DictCursor
 from memrise_scrape_viewer import app
 
 # Configuration
@@ -29,7 +29,7 @@ def close_connection(exception):
 @app.route('/')
 def index():
   # Retrieve list of things from database
-  cursor = get_database_connection().cursor()
+  cursor = get_database_connection().cursor(cursor_factory=DictCursor)
   cursor.execute("SELECT * FROM vocabulary_duolingo")
   things = cursor.fetchall()
 
