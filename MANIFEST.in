@@ -1,0 +1,3 @@
+recursive-include memrise_scrape_viewer/templates *
+recursive-include memrise_scrape_viewer/static *
+
