@@ -30,7 +30,12 @@ def close_connection(exception):
 def index():
   # Retrieve list of things from database
   cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
-  cursor.execute("SELECT * FROM vocabulary_duolingo")
+  cursor.execute("""\
+SELECT a.italian, a.english, a.part_of_speech, b.rank
+FROM vocabulary_duolingo a
+LEFT OUTER JOIN frequency_wiktionary b
+ON (a.italian=b.italian);
+""")
   things = cursor.fetchall()
   # Don't try this at home, kids
   things = [thing.update({'part_of_speech': thing['part_of_speech'].replace(';','')}) or thing
@@ -38,5 +43,3 @@ def index():
 
   # Render template
   return render_template('index.html', things=things)
-
-
