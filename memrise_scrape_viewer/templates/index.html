@@ -32,45 +32,7 @@
 {% block js %}
   <script src="static/datatables/js/jquery.dataTables.min.js"></script>
   <script src="static/datatables/js/dataTables.bootstrap.js"></script>
-  <script>
-jQuery.fn.dataTableExt.oSort['int-None-asc']  = function(x,y) {
-  if (x == 'None' && y == 'None') {
-    return 0;
-  } else if (x == 'None') {
-    return 1;
-  } else if (y == 'None') {
-    return -1;
-  } else {
-    x = parseInt(x);
-    y = parseInt(y);
-    return ((x < y) ? -1 : ((x > y) ?  1 : 0));
-  }
-};
-
-jQuery.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
-  if (x == 'None' && y == 'None') {
-    return 0;
-  } else if (x == 'None') {
-    return 1;
-  } else if (y == 'None') {
-    return -1;
-  } else {
-    x = parseInt(x);
-    y = parseInt(y);
-    return ((x < y) ?  1 : ((x > y) ? -1 : 0));
-  }
-};
-
-$(document).ready(function() {
- $('#things').dataTable({
-   "aoColumns": [
-     { "sType": "string" },
-     { "sType": "string" },
-     { "sType": "string" },
-     { "sType": "int-None" },
-   ]
- });
-});
+  <script src="static/js/memrise_scrape_viewer.js"></script>
 </script>
 {% endblock %}
 
