@@ -27,8 +27,6 @@ $.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
   }
 };
 
-var asInitVals = new Array();
-
 $(document).ready(function() {
   var oTable = $('#things').dataTable({
     "aoColumns": [
