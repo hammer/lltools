@@ -51,4 +51,13 @@ $(document).ready(function() {
     /* Filter on the column (the index) of this element */
     oTable.fnFilter(this.value, $("tfoot input").index(this));
   });
+
+  $('#unknown_words').dataTable({
+    "aoColumns": [
+      { "sType": "string" },
+      { "sType": "string" },
+      { "sType": "numeric" },
+      { "sType": "numeric" },
+    ]
+  });
 });

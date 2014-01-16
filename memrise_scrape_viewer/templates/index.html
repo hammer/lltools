@@ -6,6 +6,7 @@
 
 {% block body %}
 <div class="container">
+ <h1>Words I Know</h1>
  <table id="things">
   <thead>
    <tr>
@@ -22,6 +23,28 @@
     <td>{{thing.english}}</td>
     <td>{{thing.part_of_speech}}</td>
     <td>{{thing.rank}}</td>
+   </tr>
+  {% endfor %}
+  </tbody>
+ </table>
+
+ <h1>Words I Need to Learn</h1>
+ <table id="unknown_words">
+  <thead>
+   <tr>
+    <th>Italian</th>
+    <th>Lemma Forms</th>
+    <th>Frequency</th>
+    <th>Top 1000 Rank</th>
+   </tr>
+  </thead>
+  <tbody>
+  {% for unknown_word in unknown_words %}
+   <tr>
+    <td>{{unknown_word.italian}}</td>
+    <td>{{unknown_word.lemma_forms}}</td>
+    <td>{{unknown_word.occurrences}}</td>
+    <td>{{unknown_word.rank}}</td>
    </tr>
   {% endfor %}
   </tbody>

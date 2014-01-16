@@ -41,5 +41,16 @@ ON (a.italian_no_article=b.italian);
   things = [thing.update({'part_of_speech': thing['part_of_speech'].replace(';','')}) or thing
             for thing in things]
 
+  # Retrieve unknown words from the frequency list
+  cursor.execute("""\
+SELECT *
+FROM frequency_wiktionary a
+WHERE NOT EXISTS (SELECT 1 
+                  FROM vocabulary_duolingo b 
+                  WHERE a.italian = b.italian_no_article OR a.lemma_forms = b.italian_no_article)
+      AND char_length(a.italian) > 2;
+""")
+  unknown_words = cursor.fetchall()
+
   # Render template
-  return render_template('index.html', things=things)
+  return render_template('index.html', things=things, unknown_words=unknown_words)
