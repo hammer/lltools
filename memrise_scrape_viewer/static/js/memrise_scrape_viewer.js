@@ -35,7 +35,8 @@ $(document).ready(function() {
       { "sType": "string" },
       { "sType": "int-None" },
     ],
-    "oLanguage": {"sSearch": "Search all columns:"}
+    "oLanguage": {"sSearch": "Search all columns:"},
+    "bSortClasses": false
   });
 
   // Need to add a tfoot so the per-column search boxes will appear
@@ -58,6 +59,7 @@ $(document).ready(function() {
       { "sType": "string" },
       { "sType": "numeric" },
       { "sType": "numeric" },
-    ]
+    ],
+    "bSortClasses": false
   });
 });
