@@ -34,6 +34,7 @@ $(document).ready(function() {
       { "sType": "string" },
       { "sType": "string" },
       { "sType": "int-None" },
+      { "sType": "int-None" },
     ],
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false
@@ -53,11 +54,19 @@ $(document).ready(function() {
     oTable.fnFilter(this.value, $("tfoot input").index(this));
   });
 
-  $('#unknown_words').dataTable({
+  $('#wiktionary_unknown_words').dataTable({
     "aoColumns": [
       { "sType": "string" },
       { "sType": "string" },
       { "sType": "numeric" },
+      { "sType": "numeric" },
+    ],
+    "bSortClasses": false
+  });
+
+  $('#it_2012_unknown_words').dataTable({
+    "aoColumns": [
+      { "sType": "string" },
       { "sType": "numeric" },
     ],
     "bSortClasses": false

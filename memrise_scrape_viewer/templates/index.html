@@ -13,7 +13,8 @@
     <th>Italian</th>
     <th>English</th>
     <th>POS</th>
-    <th>Top 1000 Rank</th>
+    <th>Wiktionary Rank</th>
+    <th>IT 2012 Occurrences</th>
    </tr>
   </thead>
   <tbody>
@@ -22,14 +23,15 @@
     <td>{{thing.italian}}</td>
     <td>{{thing.english}}</td>
     <td>{{thing.part_of_speech}}</td>
-    <td>{{thing.rank}}</td>
+    <td>{{thing.wiktionary_rank}}</td>
+    <td>{{thing.it_2012_occurrences}}</td>
    </tr>
   {% endfor %}
   </tbody>
  </table>
 
- <h1>Words I Need to Learn</h1>
- <table id="unknown_words" class="table table-striped">
+ <h1>Wiktionary Words I Need to Learn</h1>
+ <table id="wiktionary_unknown_words" class="table table-striped">
   <thead>
    <tr>
     <th>Italian</th>
@@ -39,12 +41,30 @@
    </tr>
   </thead>
   <tbody>
-  {% for unknown_word in unknown_words %}
+  {% for unknown_word in wiktionary_unknown_words %}
    <tr>
     <td>{{unknown_word.italian}}</td>
     <td>{{unknown_word.lemma_forms}}</td>
     <td>{{unknown_word.occurrences}}</td>
     <td>{{unknown_word.rank}}</td>
+   </tr>
+  {% endfor %}
+  </tbody>
+ </table>
+
+ <h1>IT 2012 Words I Need to Learn</h1>
+ <table id="it_2012_unknown_words" class="table table-striped">
+  <thead>
+   <tr>
+    <th>Italian</th>
+    <th>Frequency</th>
+   </tr>
+  </thead>
+  <tbody>
+  {% for unknown_word in it_2012_unknown_words %}
+   <tr>
+    <td>{{unknown_word.italian}}</td>
+    <td>{{unknown_word.occurrences}}</td>
    </tr>
   {% endfor %}
   </tbody>
