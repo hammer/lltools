@@ -29,6 +29,9 @@ $.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
 
 $(document).ready(function() {
   var oTable = $('#things').dataTable({
+    "bProcessing": true,
+    "bServerSide": true,
+    "sAjaxSource": "vocabulary",
     "aoColumns": [
       { "sType": "string" },
       { "sType": "string" },

@@ -1,7 +1,12 @@
-from flask import g, render_template
+from flask import g, render_template, request
+from flask.ext.restful import Resource, Api
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from memrise_scrape_viewer import app
+
+# Flask-RESTful object; maybe better in __init__.py?
+api = Api(app)
+
 
 # Configuration
 DATABASE_NAME = 'memrise'
@@ -28,16 +33,10 @@ def close_connection(exception):
 # Routes
 @app.route('/')
 def index():
-  # Retrieve list of things from database
   cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
-  cursor.execute("""\
-SELECT *
-FROM vocabulary_enriched
-""")
-  things = cursor.fetchall()
-  # Don't try this at home, kids
-  things = [thing.update({'part_of_speech': thing['part_of_speech'].replace(';','')}) or thing
-            for thing in things]
+    
+  # Retrieve list of things from database
+  # (Done by Vocabulary Resource)
 
   # Retrieve unknown words from the Wiktionary frequency list
   cursor.execute("""\
@@ -64,6 +63,59 @@ LIMIT 1000;
 
   # Render template
   return render_template('index.html',
-                         things=things,
                          wiktionary_unknown_words=wiktionary_unknown_words,
                          it_2012_unknown_words=it_2012_unknown_words)
+
+# API endpoint for vocabulary table, since it's getting big
+class Vocabulary(Resource):
+  def get(self):
+    # Pull necessary information out of the request object
+    rargs = request.args
+    sEcho = rargs.get('sEcho', type=int)
+    iDisplayStart = rargs.get('iDisplayStart', type=int)
+    iDisplayLength = rargs.get('iDisplayLength', type=int)
+
+    # Base query
+    select_clause = 'SELECT *' # TODO(hammer): use explicit column names
+    from_clause = 'FROM vocabulary_enriched'
+
+    # Paging
+    limit_clause = ''
+    if (iDisplayStart is not None and iDisplayLength  != -1):
+      limit_clause = 'LIMIT %d OFFSET %d' % (iDisplayLength, iDisplayStart)
+
+    # Sorting
+    # TODO(hammer): implement
+    order_clause = ''
+
+    # Filtering
+    # TODO(hammer): implement
+    where_clause = ''
+
+    # Build, execute, and retrieve results for query
+    sql = ' '.join([select_clause, from_clause, where_clause, order_clause, limit_clause]) + ';'
+    cursor = get_database_connection().cursor()
+    cursor.execute(sql)
+    things = cursor.fetchall()
+
+    # Assemble response
+    # TODO(hammer): don't do 3 queries!
+    # Count of all values in table
+    cursor.execute(' '.join(['SELECT COUNT(*)', from_clause]) + ';')
+    iTotalRecords = cursor.fetchone()[0]
+
+    # Count of all values that satisfy WHERE clause
+    cursor.execute(' '.join([select_clause, from_clause, where_clause]) + ';')
+    iTotalDisplayRecords = cursor.rowcount
+
+    response = {'sEcho': sEcho,
+                'iTotalRecords': iTotalRecords,
+                'iTotalDisplayRecords': iTotalDisplayRecords,
+                'aaData': things
+               }
+
+    return response
+
+
+api.add_resource(Vocabulary, '/vocabulary')
+
