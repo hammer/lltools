@@ -108,9 +108,9 @@ class Vocabulary(Resource):
     # Build, execute, and retrieve results for query
     sql = ' '.join([select_clause, from_clause, where_clause, order_clause, limit_clause]) + ';'
     cursor = get_database_connection().cursor()
+    # safe string substitution
     if where_clause:
-      app.logger.info('sql: %s' % sql)
-      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns)) # safe string substitution
+      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns))
     else:
       cursor.execute(sql)
     things = cursor.fetchall()
