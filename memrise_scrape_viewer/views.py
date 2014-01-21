@@ -1,7 +1,10 @@
+from string import Template
+
 from flask import g, render_template, request
 from flask.ext.restful import Resource, Api
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
 from memrise_scrape_viewer import app
 
 # Flask-RESTful object; maybe better in __init__.py?
@@ -88,19 +91,28 @@ class Vocabulary(Resource):
     # TODO(hammer): use NULLS FIRST/NULLS LAST to get int-None sorting behavior
     iSortingCols = rargs.get('iSortingCols', type=int)
     orders = ['%s %s' % (source_columns[rargs.get('iSortCol_%d' % i, type=int)],
-                         'asc' if rargs.get('sSortDir_%d' % i) == 'asc' else 'desc')
+                         'ASC' if rargs.get('sSortDir_%d' % i) == 'asc' else 'DESC')
               for i in range(iSortingCols)
               if rargs.get('bSortable_%d' % rargs.get('iSortCol_%d' % i, type=int), type=bool)]
     order_clause = 'ORDER BY %s' % ','.join(orders) if orders else ''
 
     # Filtering
-    # TODO(hammer): implement
+    # TODO(hammer): implement per-column filtering
     where_clause = ''
+    sSearch = rargs.get('sSearch')
+    if sSearch:
+      where_clause = 'WHERE (%s)' % ' OR '.join([Template("CAST($col AS text) LIKE %s").safe_substitute(dict(col=col))
+                                                 for col
+                                                 in source_columns])
 
     # Build, execute, and retrieve results for query
     sql = ' '.join([select_clause, from_clause, where_clause, order_clause, limit_clause]) + ';'
     cursor = get_database_connection().cursor()
-    cursor.execute(sql)
+    if where_clause:
+      app.logger.info('sql: %s' % sql)
+      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns)) # safe string substitution
+    else:
+      cursor.execute(sql)
     things = cursor.fetchall()
 
     # Assemble response
@@ -112,8 +124,11 @@ class Vocabulary(Resource):
     iTotalRecords = cursor.fetchone()[0]
 
     # Count of all values that satisfy WHERE clause
-    cursor.execute(' '.join([select_clause, from_clause, where_clause]) + ';')
-    iTotalDisplayRecords = cursor.rowcount
+    iTotalDisplayRecords = iTotalRecords
+    if where_clause:
+      sql = ' '.join([select_clause, from_clause, where_clause]) + ';'
+      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns))
+      iTotalDisplayRecords = cursor.rowcount
 
     response = {'sEcho': sEcho,
                 'iTotalRecords': iTotalRecords,
