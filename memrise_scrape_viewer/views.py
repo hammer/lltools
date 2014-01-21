@@ -69,6 +69,9 @@ LIMIT 1000;
 # API endpoint for vocabulary table, since it's getting big
 class Vocabulary(Resource):
   def get(self):
+    ###################
+    # Setup
+    ###################
     # Model information
     source_table = 'vocabulary_enriched'
     source_columns = ['italian', 'english', 'part_of_speech', 'wiktionary_rank', 'it_2012_occurrences']
@@ -76,6 +79,9 @@ class Vocabulary(Resource):
     # Convenient access to request arguments
     rargs = request.args
 
+    ###################
+    # Build query
+    ###################
     # Base query
     select_clause = 'SELECT %s' % ','.join(source_columns)
     from_clause = 'FROM %s' % source_table
@@ -105,8 +111,11 @@ class Vocabulary(Resource):
                                                  for col
                                                  in source_columns])
 
-    # Build, execute, and retrieve results for query
     sql = ' '.join([select_clause, from_clause, where_clause, order_clause, limit_clause]) + ';'
+
+    ###################
+    # Execute query
+    ###################
     cursor = get_database_connection().cursor()
     # safe string substitution
     if where_clause:
@@ -115,7 +124,9 @@ class Vocabulary(Resource):
       cursor.execute(sql)
     things = cursor.fetchall()
 
+    ###################
     # Assemble response
+    ###################
     sEcho = rargs.get('sEcho', type=int)
 
     # TODO(hammer): don't do 3 queries!
