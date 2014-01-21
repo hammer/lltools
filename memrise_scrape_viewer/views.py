@@ -70,7 +70,7 @@ class Vocabulary(Resource):
     source_table = 'vocabulary_enriched'
     source_columns = ['italian', 'english', 'part_of_speech', 'wiktionary_rank', 'it_2012_occurrences']
 
-    # Convenient access to request argumentsn
+    # Convenient access to request arguments
     rargs = request.args
 
     # Base query
