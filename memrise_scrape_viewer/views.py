@@ -34,9 +34,6 @@ def close_connection(exception):
 @app.route('/')
 def index():
   cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
-    
-  # Retrieve list of things from database
-  # (Done by Vocabulary Resource)
 
   # Retrieve unknown words from the Wiktionary frequency list
   cursor.execute("""\
@@ -69,24 +66,32 @@ LIMIT 1000;
 # API endpoint for vocabulary table, since it's getting big
 class Vocabulary(Resource):
   def get(self):
-    # Pull necessary information out of the request object
+    # Model information
+    source_table = 'vocabulary_enriched'
+    source_columns = ['italian', 'english', 'part_of_speech', 'wiktionary_rank', 'it_2012_occurrences']
+
+    # Convenient access to request argumentsn
     rargs = request.args
-    sEcho = rargs.get('sEcho', type=int)
-    iDisplayStart = rargs.get('iDisplayStart', type=int)
-    iDisplayLength = rargs.get('iDisplayLength', type=int)
 
     # Base query
-    select_clause = 'SELECT *' # TODO(hammer): use explicit column names
-    from_clause = 'FROM vocabulary_enriched'
+    select_clause = 'SELECT %s' % ','.join(source_columns)
+    from_clause = 'FROM %s' % source_table
 
     # Paging
     limit_clause = ''
+    iDisplayStart = rargs.get('iDisplayStart', type=int)
+    iDisplayLength = rargs.get('iDisplayLength', type=int)
     if (iDisplayStart is not None and iDisplayLength  != -1):
       limit_clause = 'LIMIT %d OFFSET %d' % (iDisplayLength, iDisplayStart)
 
     # Sorting
-    # TODO(hammer): implement
-    order_clause = ''
+    # TODO(hammer): use NULLS FIRST/NULLS LAST to get int-None sorting behavior
+    iSortingCols = rargs.get('iSortingCols', type=int)
+    orders = ['%s %s' % (source_columns[rargs.get('iSortCol_%d' % i, type=int)],
+                         'asc' if rargs.get('sSortDir_%d' % i) == 'asc' else 'desc')
+              for i in range(iSortingCols)
+              if rargs.get('bSortable_%d' % rargs.get('iSortCol_%d' % i, type=int), type=bool)]
+    order_clause = 'ORDER BY %s' % ','.join(orders) if orders else ''
 
     # Filtering
     # TODO(hammer): implement
@@ -99,6 +104,8 @@ class Vocabulary(Resource):
     things = cursor.fetchall()
 
     # Assemble response
+    sEcho = rargs.get('sEcho', type=int)
+
     # TODO(hammer): don't do 3 queries!
     # Count of all values in table
     cursor.execute(' '.join(['SELECT COUNT(*)', from_clause]) + ';')
