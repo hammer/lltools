@@ -33,11 +33,11 @@ $(document).ready(function() {
     "bServerSide": true,
     "sAjaxSource": "vocabulary",
     "aoColumns": [
-      { "sType": "string" },
-      { "sType": "string" },
-      { "sType": "string" },
-      { "sType": "int-None" },
-      { "sType": "int-None" },
+      {"sType": "string"},
+      {"sType": "string"},
+      {"sType": "string"},
+      {"sType": "int-None", "bSearchable": false},
+      {"sType": "int-None", "bSearchable": false}
     ],
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false
@@ -48,7 +48,8 @@ $(document).ready(function() {
       '<th rowspan="1" colspan="1"><input type="text" name="italian" placeholder="Search italian" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="english" placeholder="Search english" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="pos" placeholder="Search POS" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="rank" placeholder="Search rank" class="search_init"></th>' +
+      '<th rowspan="1" colspan="1"></th>' +
+      '<th rowspan="1" colspan="1"></th>' +
       '</tr></tfoot>';
   $('#things').append(tfoot);
 	

@@ -1,4 +1,5 @@
 from string import Template
+from distutils.util import strtobool
 
 from flask import g, render_template, request
 from flask.ext.restful import Resource, Api
@@ -42,9 +43,10 @@ def index():
   cursor.execute("""\
 SELECT *
 FROM frequency_wiktionary a
-WHERE NOT EXISTS (SELECT 1 
-                  FROM vocabulary b 
-                  WHERE a.italian = b.italian_no_article OR a.lemma_forms = b.italian_no_article)
+WHERE NOT EXISTS (SELECT 1
+                  FROM vocabulary b
+                  WHERE a.italian = b.italian_no_article
+                        OR a.lemma_forms = b.italian_no_article)
       AND char_length(a.italian) > 2;
 """)
   wiktionary_unknown_words = cursor.fetchall()
@@ -52,11 +54,11 @@ WHERE NOT EXISTS (SELECT 1
   # Retrieve unknown words from the it 2012 frequency list
   cursor.execute("""\
 SELECT *
-FROM frequency_it_2012 a 
-WHERE NOT EXISTS (SELECT 1 
-                  FROM vocabulary b 
+FROM frequency_it_2012 a
+WHERE NOT EXISTS (SELECT 1
+                  FROM vocabulary b
                   WHERE a.italian = b.italian_no_article)
-      AND char_length(a.italian) > 2 
+      AND char_length(a.italian) > 2
 LIMIT 1000;
 """)
   it_2012_unknown_words = cursor.fetchall()
@@ -73,55 +75,73 @@ class Vocabulary(Resource):
     # Setup
     ###################
     # Model information
+    cursor = get_database_connection().cursor()
     source_table = 'vocabulary_enriched'
-    source_columns = ['italian', 'english', 'part_of_speech', 'wiktionary_rank', 'it_2012_occurrences']
-
-    # Convenient access to request arguments
-    rargs = request.args
+    source_columns = ['italian', 'english', 'part_of_speech',
+                      'wiktionary_rank', 'it_2012_occurrences']
 
     ###################
     # Build query
     ###################
+    # Convenient access to request arguments
+    rargs = request.args
+
     # Base query
     select_clause = 'SELECT %s' % ','.join(source_columns)
     from_clause = 'FROM %s' % source_table
 
     # Paging
-    limit_clause = ''
     iDisplayStart = rargs.get('iDisplayStart', type=int)
     iDisplayLength = rargs.get('iDisplayLength', type=int)
-    if (iDisplayStart is not None and iDisplayLength  != -1):
-      limit_clause = 'LIMIT %d OFFSET %d' % (iDisplayLength, iDisplayStart)
+    limit_clause = 'LIMIT %d OFFSET %d' % (iDisplayLength, iDisplayStart) \
+                   if (iDisplayStart is not None and iDisplayLength  != -1) \
+                   else ''
 
     # Sorting
-    # TODO(hammer): use NULLS FIRST/NULLS LAST to get int-None sorting behavior
     iSortingCols = rargs.get('iSortingCols', type=int)
-    orders = ['%s %s' % (source_columns[rargs.get('iSortCol_%d' % i, type=int)],
-                         'ASC' if rargs.get('sSortDir_%d' % i) == 'asc' else 'DESC')
-              for i in range(iSortingCols)
-              if rargs.get('bSortable_%d' % rargs.get('iSortCol_%d' % i, type=int), type=bool)]
+    orders = []
+    for i in range(iSortingCols):
+      col_index = rargs.get('iSortCol_%d' % i, type=int)
+      if rargs.get('bSortable_%d' % col_index, type=strtobool):
+        col_name = source_columns[col_index]
+        sort_dir =  'ASC' \
+                    if rargs.get('sSortDir_%d' % i) == 'asc' \
+                    else 'DESC NULLS LAST'
+        orders.append('%s %s' % (col_name, sort_dir))
     order_clause = 'ORDER BY %s' % ','.join(orders) if orders else ''
 
-    # Filtering
-    # TODO(hammer): implement per-column filtering
-    where_clause = ''
-    sSearch = rargs.get('sSearch')
-    if sSearch:
-      where_clause = 'WHERE (%s)' % ' OR '.join([Template("CAST($col AS text) LIKE %s").safe_substitute(dict(col=col))
-                                                 for col
-                                                 in source_columns])
+    # Filtering ("ac" is "all columns", "pc" is "per column")
+    ac_search = rargs.get('sSearch')
+    ac_like_exprs, ac_patterns, pc_like_exprs, pc_patterns = [], [], [], []
+    for i, col in enumerate(source_columns):
+      if rargs.get('bSearchable_%d' % i, type=strtobool):
+        like_expr = Template("$col LIKE %s").safe_substitute(dict(col=col))
+        if ac_search:
+          ac_like_exprs.append(like_expr)
+          ac_patterns.append('%' + ac_search + '%')
 
-    sql = ' '.join([select_clause, from_clause, where_clause, order_clause, limit_clause]) + ';'
+        pc_search = rargs.get('sSearch_%d' % i)
+        if pc_search:
+          pc_like_exprs.append(like_expr)
+          pc_patterns.append('%' + pc_search + '%')
+
+    ac_subclause = '(%s)' % ' OR '.join(ac_like_exprs) if ac_search else ''
+    pc_subclause = ' AND '.join(pc_like_exprs)
+    subclause = ' AND '.join([ac_subclause, pc_subclause]) \
+                if ac_subclause and pc_subclause \
+                else ac_subclause or pc_subclause
+    where_clause = 'WHERE %s' % subclause if subclause else ''
+
+    sql = ' '.join([select_clause,
+                    from_clause,
+                    where_clause,
+                    order_clause,
+                    limit_clause]) + ';'
 
     ###################
     # Execute query
     ###################
-    cursor = get_database_connection().cursor()
-    # safe string substitution
-    if where_clause:
-      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns))
-    else:
-      cursor.execute(sql)
+    cursor.execute(sql, ac_patterns + pc_patterns)
     things = cursor.fetchall()
 
     ###################
@@ -138,7 +158,7 @@ class Vocabulary(Resource):
     iTotalDisplayRecords = iTotalRecords
     if where_clause:
       sql = ' '.join([select_clause, from_clause, where_clause]) + ';'
-      cursor.execute(sql, ('%' + sSearch + '%',) * len(source_columns))
+      cursor.execute(sql, ac_patterns + pc_patterns)
       iTotalDisplayRecords = cursor.rowcount
 
     response = {'sEcho': sEcho,
@@ -151,4 +171,3 @@ class Vocabulary(Resource):
 
 
 api.add_resource(Vocabulary, '/vocabulary')
-
