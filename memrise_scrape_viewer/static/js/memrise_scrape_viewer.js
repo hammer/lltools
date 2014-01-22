@@ -36,6 +36,7 @@ $(document).ready(function() {
       {"sType": "string"},
       {"sType": "string"},
       {"sType": "string"},
+      {"sType": "string"},
       {"sType": "int-None", "bSearchable": false},
       {"sType": "int-None", "bSearchable": false}
     ],
@@ -48,15 +49,17 @@ $(document).ready(function() {
       '<th rowspan="1" colspan="1"><input type="text" name="italian" placeholder="Search italian" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="english" placeholder="Search english" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="pos" placeholder="Search POS" class="search_init"></th>' +
+      '<th rowspan="1" colspan="1"><input type="text" name="course" placeholder="Search course" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"></th>' +
       '<th rowspan="1" colspan="1"></th>' +
       '</tr></tfoot>';
   $('#things').append(tfoot);
-	
+
   $("tfoot input").keyup(function () {
     /* Filter on the column (the index) of this element */
     oTable.fnFilter(this.value, $("tfoot input").index(this));
   });
+
 
   $('#wiktionary_unknown_words').dataTable({
     "aoColumns": [
@@ -67,6 +70,7 @@ $(document).ready(function() {
     ],
     "bSortClasses": false
   });
+
 
   $('#it_2012_unknown_words').dataTable({
     "aoColumns": [
