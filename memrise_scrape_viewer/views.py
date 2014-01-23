@@ -75,10 +75,10 @@ class Vocabulary(Resource):
     # Setup
     ###################
     # Model information
-    cursor = get_database_connection().cursor()
-    source_table = 'vocabulary_enriched'
+    cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
+    source_table = 'vocabulary_deduplicated'
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
-                      'wiktionary_rank', 'it_2012_occurrences']
+                      'wiktionary_rank', 'it_2012_occurrences', 'oid AS "DT_RowId"']
 
     ###################
     # Build query
@@ -152,7 +152,7 @@ class Vocabulary(Resource):
     # TODO(hammer): don't do 3 queries!
     # Count of all values in table
     cursor.execute(' '.join(['SELECT COUNT(*)', from_clause]) + ';')
-    iTotalRecords = cursor.fetchone()[0]
+    iTotalRecords = cursor.fetchone().get('count')
 
     # Count of all values that satisfy WHERE clause
     iTotalDisplayRecords = iTotalRecords
@@ -166,7 +166,7 @@ class Vocabulary(Resource):
                 'iTotalDisplayRecords': iTotalDisplayRecords,
                 'aaData': things
                }
-
+    app.logger.info('things[0]: ' + str(things[0]))
     return response
 
 

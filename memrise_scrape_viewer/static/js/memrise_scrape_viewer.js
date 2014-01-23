@@ -33,12 +33,12 @@ $(document).ready(function() {
     "bServerSide": true,
     "sAjaxSource": "vocabulary",
     "aoColumns": [
-      {"sType": "string"},
-      {"sType": "string"},
-      {"sType": "string"},
-      {"sType": "string"},
-      {"sType": "int-None", "bSearchable": false},
-      {"sType": "int-None", "bSearchable": false}
+      {"mData": "italian", "sType": "string"},
+      {"mData": "english", "sType": "string"},
+      {"mData": "part_of_speech", "sType": "string"},
+      {"mData": "course", "sType": "string"},
+      {"mData": "wiktionary_rank", "sType": "int-None", "bSearchable": false},
+      {"mData": "it_2012_occurrences", "sType": "int-None", "bSearchable": false},
     ],
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false
