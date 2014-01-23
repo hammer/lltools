@@ -41,7 +41,27 @@ $(document).ready(function() {
       {"mData": "it_2012_occurrences", "sType": "int-None", "bSearchable": false},
     ],
     "oLanguage": {"sSearch": "Search all columns:"},
-    "bSortClasses": false
+    "bSortClasses": false,
+    "fnDrawCallback": function () {
+      $('#things tbody td').editable('vocabulary', {
+        "callback": function(sValue, y) {
+	  var oTable = $('#things').dataTable();
+	  var aPos = oTable.fnGetPosition(this);
+	  oTable.fnUpdate(sValue, aPos[0], aPos[1]);
+          oTable.fnDraw();
+        },
+	"submitdata": function (value, settings) {
+	  var oTable = $('#things').dataTable();
+	  var aPos2 = oTable.fnGetPosition(this);
+	  var id2 = oTable.fnGetData(aPos2[0]);
+	  return {
+	    "row_id": this.parentNode.getAttribute('id'),
+	    "column": oTable.fnGetPosition(this)[2]
+	  };
+        },
+	"placeholder": ""
+      });
+    }
   });
 
   // Need to add a tfoot so the per-column search boxes will appear
@@ -59,7 +79,6 @@ $(document).ready(function() {
     /* Filter on the column (the index) of this element */
     oTable.fnFilter(this.value, $("tfoot input").index(this));
   });
-
 
   $('#wiktionary_unknown_words').dataTable({
     "aoColumns": [
@@ -79,4 +98,6 @@ $(document).ready(function() {
     ],
     "bSortClasses": false
   });
+
+  /* Apply the jEditable handlers to the table */
 });

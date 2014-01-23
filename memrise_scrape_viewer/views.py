@@ -70,6 +70,24 @@ LIMIT 1000;
 
 # API endpoint for vocabulary table, since it's getting big
 class Vocabulary(Resource):
+  def post(self):
+    conn = get_database_connection()
+    cursor = conn.cursor()
+    source_table = 'vocabulary_deduplicated'
+    source_columns = ['italian', 'english', 'part_of_speech', 'course',
+                      'wiktionary_rank', 'it_2012_occurrences']
+
+    oid = request.form.get('row_id', type=int)
+    column = request.form.get('column', type=int)
+    column_name = source_columns[column]
+    value = request.form.get('value')
+
+    table_col_sql = 'UPDATE %s SET %s' % (source_table, column_name)
+    cursor.execute(table_col_sql + ' = %s WHERE oid = %s;', (value, oid))
+    conn.commit()
+
+    return value
+
   def get(self):
     ###################
     # Setup
@@ -166,7 +184,6 @@ class Vocabulary(Resource):
                 'iTotalDisplayRecords': iTotalDisplayRecords,
                 'aaData': things
                }
-    app.logger.info('things[0]: ' + str(things[0]))
     return response
 
 
