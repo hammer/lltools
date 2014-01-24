@@ -52,10 +52,11 @@ $(document).ready(function() {
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false,
     "fnDrawCallback": function () {
+      // sDefaultContent doesn't seem to work
       // Better to do on client than on server?
       var that = this;
       this.$('td:first-child').each(function (i) {
-        that.fnUpdate('<i class="fa fa-trash-o fa-lg"></i>',
+        that.fnUpdate('<button><i class="fa fa-trash-o fa-lg"></i></button>',
 		      this.parentNode, 0, false, false);
       });
 
@@ -95,7 +96,7 @@ $(document).ready(function() {
 
   $("tfoot input").keyup(function () {
     /* Filter on the column (the index) of this th element */
-    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
+    oTable.fnFilter(this.value, $("tfoot th").index(this.parentNode));
   });
 
   $('#wiktionary_unknown_words').dataTable({
