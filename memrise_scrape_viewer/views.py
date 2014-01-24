@@ -152,6 +152,7 @@ class Vocabulary(Resource):
                 if ac_subclause and pc_subclause \
                 else ac_subclause or pc_subclause
     where_clause = 'WHERE %s' % subclause if subclause else ''
+    app.logger.info("where_clause: %s" % where_clause)
 
     sql = ' '.join([select_clause,
                     from_clause,

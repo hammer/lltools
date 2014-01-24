@@ -94,8 +94,8 @@ $(document).ready(function() {
   $('#things').append(tfoot);
 
   $("tfoot input").keyup(function () {
-    /* Filter on the column (the index) of this element */
-    oTable.fnFilter(this.value, $("tfoot input").index(this));
+    /* Filter on the column (the index) of this th element */
+    oTable.fnFilter(this.value, $("tfoot th").index($(this).parent()));
   });
 
   $('#wiktionary_unknown_words').dataTable({
