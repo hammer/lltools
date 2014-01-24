@@ -1,3 +1,4 @@
-recursive-include memrise_scrape_viewer/templates *
-recursive-include memrise_scrape_viewer/static *
+recursive-include lltools_web/templates *
+recursive-include lltools_web/static *
+
 

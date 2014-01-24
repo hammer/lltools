@@ -2,9 +2,11 @@
 import argparse
 import configparser
 import logging
-from lxml import html
 import os
+
+from lxml import html
 import requests
+
 
 # Constants
 # JH: not sure why the CSRF token is required, but can't get logins to work without it.

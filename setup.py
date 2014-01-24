@@ -1,13 +1,13 @@
 from setuptools import setup
 
 setup(
-    name='memrise_scraper',
+    name='lltools',
     version='0.1',
     long_description=__doc__,
-    packages=['memrise_scrape_viewer'],
-    scripts=['scripts/memrise_scraper.py', 'scripts/run_memrise_scrape_viewer_server.py'],
+    packages=['lltools_web'],
+    scripts=['scripts/memrise_scraper.py', 'scripts/run_lltools_web.py'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=['Flask', 'flask-restful', 'psycopg2', 'requests', 'lxml']
+    install_requires=['flask', 'flask-restful', 'psycopg2', 'requests', 'lxml']
 )
 

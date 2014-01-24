@@ -1,3 +1,3 @@
 #! /usr/bin/env python3
-from memrise_scrape_viewer import app
+from lltools_web import app
 app.run(debug=True)

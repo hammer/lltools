@@ -6,7 +6,7 @@ from flask.ext.restful import Resource, Api
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from memrise_scrape_viewer import app
+from lltools_web import app
 
 # Flask-RESTful object; maybe better in __init__.py?
 api = Api(app)
