@@ -31,15 +31,23 @@ $(document).ready(function() {
   var oTable = $('#things').dataTable({
     "bProcessing": true,
     "bServerSide": true,
+    "bAutoWidth": false,
     "sAjaxSource": "vocabulary",
     "aoColumns": [
-      {"mData": "delete", "sType": "string", "bSortable": false},
-      {"mData": "italian", "sType": "string", "sClass": "editable"},
-      {"mData": "english", "sType": "string", "sClass": "editable"},
-      {"mData": "part_of_speech", "sType": "string", "sClass": "editable"},
-      {"mData": "course", "sType": "string"},
-      {"mData": "wiktionary_rank", "sType": "int-None", "bSearchable": false},
-      {"mData": "it_2012_occurrences", "sType": "int-None", "bSearchable": false},
+      {"mData": "delete", "sType": "string",
+       "sWidth": "10px", "bSortable": false, "bSearchable": false},
+      {"mData": "italian", "sType": "string",
+       "sClass": "editable", "sWidth": "20%"},
+      {"mData": "english", "sType": "string",
+       "sClass": "editable", "sWidth": "30%"},
+      {"mData": "part_of_speech", "sType": "string",
+       "sClass": "editable", "sWidth": "10%"},
+      {"mData": "course", "sType": "string",
+       "sWidth": "20%"},
+      {"mData": "wiktionary_rank", "sType": "int-None",
+       "sWidth": "10%", "bSearchable": false},
+      {"mData": "it_2012_occurrences", "sType": "int-None",
+       "sWidth": "10%", "bSearchable": false},
     ],
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false,
@@ -75,6 +83,7 @@ $(document).ready(function() {
 
   // Need to add a tfoot so the per-column search boxes will appear
   var tfoot = '<tfoot><tr>' +
+      '<th rowspan="1" colspan="1"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="italian" placeholder="Search italian" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="english" placeholder="Search english" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="pos" placeholder="Search POS" class="search_init"></th>' +

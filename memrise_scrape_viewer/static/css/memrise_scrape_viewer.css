@@ -1,6 +1,4 @@
-/*
- * Processing indicator
- */
-.dataTables_processing {
-  padding: 4px 0 2px 0;
-}
+table { table-layout: fixed; }
+table th, table td { overflow: hidden; }
+
+.dataTables_processing { padding: 4px 0 2px 0; }

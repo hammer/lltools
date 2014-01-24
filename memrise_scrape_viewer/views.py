@@ -98,6 +98,8 @@ class Vocabulary(Resource):
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
                       'wiktionary_rank', 'it_2012_occurrences',
                       'oid AS "DT_RowId"']
+    display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
+                       'wiktionary_rank', 'it_2012_occurrences']
 
     ###################
     # Build query
@@ -122,7 +124,7 @@ class Vocabulary(Resource):
     for i in range(iSortingCols):
       col_index = rargs.get('iSortCol_%d' % i, type=int)
       if rargs.get('bSortable_%d' % col_index, type=strtobool):
-        col_name = source_columns[col_index]
+        col_name = display_columns[col_index]
         sort_dir =  'ASC' \
                     if rargs.get('sSortDir_%d' % i) == 'asc' \
                     else 'DESC NULLS LAST'
@@ -132,7 +134,7 @@ class Vocabulary(Resource):
     # Filtering ("ac" is "all columns", "pc" is "per column")
     ac_search = rargs.get('sSearch')
     ac_like_exprs, ac_patterns, pc_like_exprs, pc_patterns = [], [], [], []
-    for i, col in enumerate(source_columns):
+    for i, col in enumerate(display_columns):
       if rargs.get('bSearchable_%d' % i, type=strtobool):
         like_expr = Template("$col LIKE %s").safe_substitute(dict(col=col))
         if ac_search:
