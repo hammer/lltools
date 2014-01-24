@@ -96,7 +96,8 @@ class Vocabulary(Resource):
     cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
     source_table = 'vocabulary_deduplicated'
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
-                      'wiktionary_rank', 'it_2012_occurrences', 'oid AS "DT_RowId"']
+                      'wiktionary_rank', 'it_2012_occurrences',
+                      'oid AS "DT_RowId"']
 
     ###################
     # Build query
@@ -161,6 +162,8 @@ class Vocabulary(Resource):
     ###################
     cursor.execute(sql, ac_patterns + pc_patterns)
     things = cursor.fetchall()
+    # Feels cleaner to do this here and not with source_columns
+    [thing.update({'delete':''}) for thing in things]
 
     ###################
     # Assemble response

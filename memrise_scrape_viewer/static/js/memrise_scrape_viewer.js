@@ -33,9 +33,10 @@ $(document).ready(function() {
     "bServerSide": true,
     "sAjaxSource": "vocabulary",
     "aoColumns": [
-      {"mData": "italian", "sType": "string"},
-      {"mData": "english", "sType": "string"},
-      {"mData": "part_of_speech", "sType": "string"},
+      {"mData": "delete", "sType": "string", "bSortable": false},
+      {"mData": "italian", "sType": "string", "sClass": "editable"},
+      {"mData": "english", "sType": "string", "sClass": "editable"},
+      {"mData": "part_of_speech", "sType": "string", "sClass": "editable"},
       {"mData": "course", "sType": "string"},
       {"mData": "wiktionary_rank", "sType": "int-None", "bSearchable": false},
       {"mData": "it_2012_occurrences", "sType": "int-None", "bSearchable": false},
@@ -43,7 +44,15 @@ $(document).ready(function() {
     "oLanguage": {"sSearch": "Search all columns:"},
     "bSortClasses": false,
     "fnDrawCallback": function () {
-      $('#things tbody td').editable('vocabulary', {
+      // Better to do on client than on server?
+      var that = this;
+      this.$('td:first-child').each(function (i) {
+        that.fnUpdate('<i class="fa fa-trash-o fa-lg"></i>',
+		      this.parentNode, 0, false, false);
+      });
+
+      // jEditable
+      $('#things tbody td.editable').editable('vocabulary', {
         "callback": function(sValue, y) {
 	  var oTable = $('#things').dataTable();
 	  var aPos = oTable.fnGetPosition(this);
