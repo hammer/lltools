@@ -68,13 +68,14 @@ LIMIT 1000;
                          wiktionary_unknown_words=wiktionary_unknown_words,
                          it_2012_unknown_words=it_2012_unknown_words)
 
+
 # API endpoint for vocabulary table, since it's getting big
 class Vocabulary(Resource):
   def post(self):
     conn = get_database_connection()
     cursor = conn.cursor()
     source_table = 'vocabulary_deduplicated'
-    source_columns = ['italian', 'english', 'part_of_speech', 'course',
+    display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
                       'wiktionary_rank', 'it_2012_occurrences']
 
     # Delete
@@ -88,7 +89,7 @@ class Vocabulary(Resource):
     # Update
     oid = request.form.get('row_id', type=int)
     column = request.form.get('column', type=int)
-    column_name = source_columns[column]
+    column_name = display_columns[column]
     value = request.form.get('value')
 
     table_col_sql = 'UPDATE %s SET %s' % (source_table, column_name)

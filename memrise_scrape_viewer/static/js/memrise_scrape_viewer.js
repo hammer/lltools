@@ -29,9 +29,11 @@ $.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
 
 $(document).ready(function() {
   var oTable = $('#things').dataTable({
+    "bAutoWidth": false,
     "bProcessing": true,
     "bServerSide": true,
-    "bAutoWidth": false,
+    "bSortClasses": false,
+    "oLanguage": {"sSearch": "Search all columns:"},
     "sAjaxSource": "vocabulary",
     "aoColumns": [
       {"mData": "delete", "sType": "string",
@@ -49,11 +51,8 @@ $(document).ready(function() {
       {"mData": "it_2012_occurrences", "sType": "int-None",
        "sWidth": "10%", "bSearchable": false},
     ],
-    "oLanguage": {"sSearch": "Search all columns:"},
-    "bSortClasses": false,
     "fnDrawCallback": function () {
-      // sDefaultContent doesn't seem to work
-      // Better to do on client than on server?
+      // Delete (row)
       var that = this;
       this.$('td:first-child').each(function (i) {
         that.fnUpdate('<form action="vocabulary" method="post" class="delete"> \
@@ -62,7 +61,6 @@ $(document).ready(function() {
 		      this.parentNode, 0, false, false);
       });
 
-      // Delete
       $('form.delete').submit(function(e) {
         e.preventDefault();
 
@@ -74,7 +72,7 @@ $(document).ready(function() {
 	});
       });
 
-      // jEditable
+      // Update (cell)
       $('#things tbody td.editable').editable('vocabulary', {
         "callback": function(sValue, y) {
 	  var oTable = $('#things').dataTable();
@@ -96,7 +94,7 @@ $(document).ready(function() {
     }
   });
 
-  // Need to add a tfoot so the per-column search boxes will appear
+  // Per-column filtering
   var tfoot = '<tfoot><tr>' +
       '<th rowspan="1" colspan="1"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="italian" placeholder="Search italian" class="search_init"></th>' +
@@ -109,9 +107,9 @@ $(document).ready(function() {
   $('#things').append(tfoot);
 
   $("tfoot input").keyup(function () {
-    /* Filter on the column (the index) of this th element */
     oTable.fnFilter(this.value, $("tfoot th").index(this.parentNode));
   });
+
 
   $('#wiktionary_unknown_words').dataTable({
     "aoColumns": [
@@ -131,6 +129,4 @@ $(document).ready(function() {
     ],
     "bSortClasses": false
   });
-
-  /* Apply the jEditable handlers to the table */
 });
