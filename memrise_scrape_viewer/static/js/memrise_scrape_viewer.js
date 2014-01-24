@@ -56,8 +56,22 @@ $(document).ready(function() {
       // Better to do on client than on server?
       var that = this;
       this.$('td:first-child').each(function (i) {
-        that.fnUpdate('<button><i class="fa fa-trash-o fa-lg"></i></button>',
+        that.fnUpdate('<form action="vocabulary" method="post" class="delete"> \
+                        <button type="submit" class="fa fa-trash-o fa-lg"></button> \
+                       </form>',
 		      this.parentNode, 0, false, false);
+      });
+
+      // Delete
+      $('form.delete').submit(function(e) {
+        e.preventDefault();
+
+	var row_id = this.parentNode.parentNode.getAttribute('id');
+	var submitdata = {"row_id": row_id, "delete": true};
+
+	jQuery.post('vocabulary', submitdata, function() {
+	  $('#things').dataTable().fnDraw();
+	});
       });
 
       // jEditable

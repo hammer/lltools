@@ -77,6 +77,15 @@ class Vocabulary(Resource):
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
                       'wiktionary_rank', 'it_2012_occurrences']
 
+    # Delete
+    if request.form.get('delete', type=strtobool):
+      oid = request.form.get('row_id', type=int)
+      table_sql = 'DELETE FROM %s' % source_table
+      cursor.execute(table_sql + ' WHERE oid = %s;', (oid,))
+      conn.commit()
+      return
+
+    # Update
     oid = request.form.get('row_id', type=int)
     column = request.form.get('column', type=int)
     column_name = source_columns[column]
@@ -152,7 +161,6 @@ class Vocabulary(Resource):
                 if ac_subclause and pc_subclause \
                 else ac_subclause or pc_subclause
     where_clause = 'WHERE %s' % subclause if subclause else ''
-    app.logger.info("where_clause: %s" % where_clause)
 
     sql = ' '.join([select_clause,
                     from_clause,
