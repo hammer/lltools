@@ -8,6 +8,6 @@ setup(
     scripts=['scripts/memrise_scraper.py', 'scripts/run_memrise_scrape_viewer_server.py'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=['Flask', 'flask-restful', 'psycopg2']
+    install_requires=['Flask', 'flask-restful', 'psycopg2', 'requests', 'lxml']
 )
 
