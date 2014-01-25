@@ -76,7 +76,7 @@ class Vocabulary(Resource):
     cursor = conn.cursor()
     source_table = 'vocabulary_deduplicated'
     display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
-                      'wiktionary_rank', 'it_2012_occurrences']
+                       'tags', 'wiktionary_rank', 'it_2012_occurrences']
 
     # Delete
     if request.form.get('delete', type=strtobool):
@@ -106,10 +106,10 @@ class Vocabulary(Resource):
     cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
     source_table = 'vocabulary_deduplicated'
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
-                      'wiktionary_rank', 'it_2012_occurrences',
+                      'tags', 'wiktionary_rank', 'it_2012_occurrences',
                       'oid AS "DT_RowId"']
     display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
-                       'wiktionary_rank', 'it_2012_occurrences']
+                       'tags', 'wiktionary_rank', 'it_2012_occurrences']
 
     ###################
     # Build query

@@ -1,3 +1,21 @@
+// http://www.datatables.net/plug-ins/api#fnStandingRedraw
+$.fn.dataTableExt.oApi.fnStandingRedraw = function(oSettings) {
+  if(oSettings.oFeatures.bServerSide === false){
+    var before = oSettings._iDisplayStart;
+
+    oSettings.oApi._fnReDraw(oSettings);
+
+    // iDisplayStart has been reset to zero - so lets change it back
+    oSettings._iDisplayStart = before;
+    oSettings.oApi._fnCalculateEnd(oSettings);
+  }
+
+  // draw the 'current' page
+  console.log("_iDisplayLength: " + oSettings["_iDisplayLength"]);
+  console.log("_iDisplayStart: " + oSettings["_iDisplayStart"]);
+  oSettings.oApi._fnDraw(oSettings);
+};
+
 // Custom sort for int-None type
 $.fn.dataTableExt.oSort['int-None-asc']  = function(x,y) {
   if (x == 'None' && y == 'None') {
@@ -43,13 +61,15 @@ $(document).ready(function() {
       {"mData": "english", "sType": "string",
        "sClass": "editable", "sWidth": "30%"},
       {"mData": "part_of_speech", "sType": "string",
-       "sClass": "editable", "sWidth": "10%"},
+       "sClass": "editable", "sWidth": "5%"},
       {"mData": "course", "sType": "string",
-       "sWidth": "20%"},
+       "sWidth": "15%"},
+      {"mData": "tags", "sType": "string",
+       "sClass": "editable", "sWidth": "20%"},
       {"mData": "wiktionary_rank", "sType": "int-None",
-       "sWidth": "10%", "bSearchable": false},
+       "sWidth": "5%", "bSearchable": false},
       {"mData": "it_2012_occurrences", "sType": "int-None",
-       "sWidth": "10%", "bSearchable": false},
+       "sWidth": "5%", "bSearchable": false},
     ],
     "fnDrawCallback": function () {
       // Delete (row)
@@ -68,7 +88,7 @@ $(document).ready(function() {
 	var submitdata = {"row_id": row_id, "delete": true};
 
 	jQuery.post('vocabulary', submitdata, function() {
-	  $('#things').dataTable().fnDraw();
+	  $('#things').dataTable().fnStandingRedraw();
 	});
       });
 
@@ -77,8 +97,8 @@ $(document).ready(function() {
         "callback": function(sValue, y) {
 	  var oTable = $('#things').dataTable();
 	  var aPos = oTable.fnGetPosition(this);
-	  oTable.fnUpdate(sValue, aPos[0], aPos[1]);
-          oTable.fnDraw();
+	  oTable.fnUpdate(sValue, aPos[0], aPos[1], false);
+          oTable.fnStandingRedraw();
         },
 	"submitdata": function (value, settings) {
 	  var oTable = $('#things').dataTable();
@@ -101,6 +121,7 @@ $(document).ready(function() {
       '<th rowspan="1" colspan="1"><input type="text" name="english" placeholder="Search english" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="pos" placeholder="Search POS" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"><input type="text" name="course" placeholder="Search course" class="search_init"></th>' +
+      '<th rowspan="1" colspan="1"><input type="text" name="tags" placeholder="Search tags" class="search_init"></th>' +
       '<th rowspan="1" colspan="1"></th>' +
       '<th rowspan="1" colspan="1"></th>' +
       '</tr></tfoot>';
