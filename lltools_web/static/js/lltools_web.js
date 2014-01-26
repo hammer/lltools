@@ -51,7 +51,7 @@ $(document).ready(function() {
   $.editable.addInputType('autocomplete', {
     element: $.editable.types.text.element,
     plugin: function(settings, original) {
-      $('input', this).autocomplete(settings.autocomplete.data);
+      $('input', this).autocomplete(settings.autocomplete);
     }
   });
 
@@ -74,7 +74,7 @@ $(document).ready(function() {
       {"mData": "course", "sType": "string",
        "sWidth": "15%"},
       {"mData": "tags", "sType": "string",
-       "sClass": "editable", "sWidth": "20%"},
+       "sClass": "editabletags", "sWidth": "20%"},
       {"mData": "wiktionary_rank", "sType": "int-None",
        "sWidth": "5%", "bSearchable": false},
       {"mData": "it_2012_occurrences", "sType": "int-None",
@@ -101,16 +101,34 @@ $(document).ready(function() {
 	});
       });
 
-      // Update (cell)
+      // TODO(hammer): Don't copy code here
+      // Update (no autocomplete)
       $('#things tbody td.editable').editable('vocabulary', {
+        "callback": function(sValue, y) {
+	  var oTable = $('#things').dataTable();
+	  var aPos = oTable.fnGetPosition(this);
+	  oTable.fnUpdate(sValue, aPos[0], aPos[1], false);
+          oTable.fnStandingRedraw();
+        },
+	"submitdata": function (value, settings) {
+	  var oTable = $('#things').dataTable();
+	  return {
+	    "row_id": this.parentNode.getAttribute('id'),
+	    "column": oTable.fnGetPosition(this)[2]
+	  };
+        },
+	"placeholder": ""
+      });
+
+      // Update (autocomplete tags)
+      $('#things tbody td.editabletags').editable('vocabulary', {
 	"type": "autocomplete",
 	"autocomplete": {
-	  data: {
-	    source: ["animal", "food", "profession"],
-	    messages: {
-	      noResults: '',
-	      results: function() {}
-	    }
+	  source: "vocabulary",
+	  autoFocus: true,
+	  messages: {
+	    noResults: '',
+	    results: function() {}
 	  }
 	},
         "callback": function(sValue, y) {
@@ -121,8 +139,6 @@ $(document).ready(function() {
         },
 	"submitdata": function (value, settings) {
 	  var oTable = $('#things').dataTable();
-	  var aPos2 = oTable.fnGetPosition(this);
-	  var id2 = oTable.fnGetData(aPos2[0]);
 	  return {
 	    "row_id": this.parentNode.getAttribute('id'),
 	    "column": oTable.fnGetPosition(this)[2]

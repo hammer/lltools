@@ -100,6 +100,18 @@ class Vocabulary(Resource):
 
   def get(self):
     ###################
+    # Autocomplete
+    ###################
+    term = request.args.get('term')
+    if term:
+      cursor = get_database_connection().cursor()
+      cursor.execute("""SELECT DISTINCT tags
+                        FROM vocabulary_deduplicated
+                        WHERE tags LIKE %s;""",
+                     (term + "%",))
+      return [row[0] for row in cursor.fetchall()]
+
+    ###################
     # Setup
     ###################
     # Model information
@@ -110,6 +122,7 @@ class Vocabulary(Resource):
                       'oid AS "DT_RowId"']
     display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
                        'tags', 'wiktionary_rank', 'it_2012_occurrences']
+
 
     ###################
     # Build query
