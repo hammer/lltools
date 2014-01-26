@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block css %}
+  <link href="static/jquery-ui/css/jquery-ui.min.css" rel="stylesheet">
   <link href="static/datatables/css/jquery.dataTables.css" rel="stylesheet">
   <link href="static/datatables/css/dataTables.bootstrap.css" rel="stylesheet">
   <link href="static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
@@ -69,9 +70,10 @@
 {% endblock %}
 
 {% block js %}
+  <script src="static/jquery-ui/js/jquery-ui.min.js"></script>
   <script src="static/datatables/js/jquery.dataTables.min.js"></script>
   <script src="static/datatables/js/dataTables.bootstrap.js"></script>
-  <script src="static/js/jquery.jeditable.min.js"></script>
+  <script src="static/jeditable/jquery.jeditable.min.js"></script>
   <script src="static/js/lltools_web.js"></script>
 </script>
 {% endblock %}

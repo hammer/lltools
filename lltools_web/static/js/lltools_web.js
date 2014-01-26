@@ -45,7 +45,16 @@ $.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
   }
 };
 
+
 $(document).ready(function() {
+  // Autocomplete support for jEditable fields
+  $.editable.addInputType('autocomplete', {
+    element: $.editable.types.text.element,
+    plugin: function(settings, original) {
+      $('input', this).autocomplete(settings.autocomplete.data);
+    }
+  });
+
   var oTable = $('#things').dataTable({
     "bAutoWidth": false,
     "bProcessing": true,
@@ -94,6 +103,16 @@ $(document).ready(function() {
 
       // Update (cell)
       $('#things tbody td.editable').editable('vocabulary', {
+	"type": "autocomplete",
+	"autocomplete": {
+	  data: {
+	    source: ["animal", "food", "profession"],
+	    messages: {
+	      noResults: '',
+	      results: function() {}
+	    }
+	  }
+	},
         "callback": function(sValue, y) {
 	  var oTable = $('#things').dataTable();
 	  var aPos = oTable.fnGetPosition(this);
