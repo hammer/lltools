@@ -45,7 +45,7 @@ class Vocabulary(Resource):
   def post(self):
     conn = get_database_connection()
     cursor = conn.cursor()
-    source_table = 'vocabulary_deduplicated'
+    source_table = 'vocabulary_master'
     display_columns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
                        'tags', 'wiktionary_rank', 'it_2012_occurrences']
 
@@ -87,7 +87,7 @@ class Vocabulary(Resource):
     ###################
     # Model information
     cursor = get_database_connection().cursor(cursor_factory=RealDictCursor)
-    source_table = 'vocabulary_deduplicated'
+    source_table = 'vocabulary_master'
     source_columns = ['italian', 'english', 'part_of_speech', 'course',
                       'tags', 'wiktionary_rank', 'it_2012_occurrences',
                       'oid AS "DT_RowId"']
