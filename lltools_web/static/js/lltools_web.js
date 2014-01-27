@@ -60,8 +60,10 @@ $(document).ready(function() {
     "bProcessing": true,
     "bServerSide": true,
     "bSortClasses": false,
+    "iDisplayLength": 20,
     "oLanguage": {"sSearch": "Search all columns:"},
     "sAjaxSource": "vocabulary",
+    "sDom": '<"top"ip>rt<"bottom"ip><"clear">',
     "aoColumns": [
       {"mData": "delete", "sType": "string",
        "sWidth": "10px", "bSortable": false, "bSearchable": false},
@@ -125,11 +127,7 @@ $(document).ready(function() {
 	"type": "autocomplete",
 	"autocomplete": {
 	  source: "vocabulary",
-	  autoFocus: true,
-	  messages: {
-	    noResults: '',
-	    results: function() {}
-	  }
+	  autoFocus: true
 	},
         "callback": function(sValue, y) {
 	  var oTable = $('#things').dataTable();
@@ -150,39 +148,16 @@ $(document).ready(function() {
   });
 
   // Per-column filtering
-  var tfoot = '<tfoot><tr>' +
-      '<th rowspan="1" colspan="1"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="italian" placeholder="Search italian" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="english" placeholder="Search english" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="pos" placeholder="Search POS" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="course" placeholder="Search course" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"><input type="text" name="tags" placeholder="Search tags" class="search_init"></th>' +
-      '<th rowspan="1" colspan="1"></th>' +
-      '<th rowspan="1" colspan="1"></th>' +
-      '</tr></tfoot>';
-  $('#things').append(tfoot);
-
-  $("tfoot input").keyup(function () {
-    oTable.fnFilter(this.value, $("tfoot th").index(this.parentNode));
+  $("#search_things input").keyup(function () {
+    var displayColumns = ['delete', 'italian', 'english', 'part_of_speech', 'course',
+			   'tags', 'wiktionary_rank', 'it_2012_occurrences'];
+    var iSearchIndex = displayColumns.indexOf(this.id);
+    oTable.fnFilter(this.value, iSearchIndex);
   });
 
-
-  $('#wiktionary_unknown_words').dataTable({
-    "aoColumns": [
-      { "sType": "string" },
-      { "sType": "string" },
-      { "sType": "numeric" },
-      { "sType": "numeric" },
-    ],
-    "bSortClasses": false
-  });
-
-
-  $('#it_2012_unknown_words').dataTable({
-    "aoColumns": [
-      { "sType": "string" },
-      { "sType": "numeric" },
-    ],
-    "bSortClasses": false
+  // Autocomplete for tags
+  $("input#tags").autocomplete({
+    source: 'vocabulary',
+    autoFocus: true
   });
 });

@@ -2,3 +2,10 @@ table { table-layout: fixed; }
 table th, table td { overflow: hidden; }
 
 .dataTables_processing { padding: 4px 0 2px 0; }
+
+div.dataTables_paginate { float: left; }
+div.dataTables_info { float: right; }
+
+div#search_things.well {
+ background-color: white;
+}
