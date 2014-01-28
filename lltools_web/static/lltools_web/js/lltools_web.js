@@ -11,8 +11,6 @@ $.fn.dataTableExt.oApi.fnStandingRedraw = function(oSettings) {
   }
 
   // draw the 'current' page
-  console.log("_iDisplayLength: " + oSettings["_iDisplayLength"]);
-  console.log("_iDisplayStart: " + oSettings["_iDisplayStart"]);
   oSettings.oApi._fnDraw(oSettings);
 };
 
@@ -47,45 +45,37 @@ $.fn.dataTableExt.oSort['int-None-desc']  = function(x,y) {
 
 
 $(document).ready(function() {
-  // Autocomplete support for jEditable fields
-  $.editable.addInputType('autocomplete', {
-    element: $.editable.types.text.element,
-    plugin: function(settings, original) {
-      $('input', this).autocomplete(settings.autocomplete);
-    }
-  });
-
   var oTable = $('#things').dataTable({
-    "bAutoWidth": false,
-    "bProcessing": true,
-    "bServerSide": true,
-    "bSortClasses": false,
-    "iDisplayLength": 20,
-    "oLanguage": {"sSearch": "Search all columns:"},
-    "sAjaxSource": "vocabulary",
-    "sDom": '<"top"ip>rt<"bottom"ip><"clear">',
-    "aoColumns": [
-      {"mData": "delete", "sType": "string",
-       "sWidth": "10px", "bSortable": false, "bSearchable": false},
-      {"mData": "italian", "sType": "string",
-       "sClass": "editable", "sWidth": "20%"},
-      {"mData": "english", "sType": "string",
-       "sClass": "editable", "sWidth": "30%"},
-      {"mData": "part_of_speech", "sType": "string",
-       "sClass": "editable", "sWidth": "5%"},
-      {"mData": "course", "sType": "string",
-       "sWidth": "15%"},
-      {"mData": "tags", "sType": "string",
-       "sClass": "editabletags", "sWidth": "20%"},
-      {"mData": "wiktionary_rank", "sType": "int-None",
-       "sWidth": "5%", "bSearchable": false},
-      {"mData": "it_2012_occurrences", "sType": "int-None",
-       "sWidth": "5%", "bSearchable": false},
+    bAutoWidth: false,
+    bProcessing: true,
+    bServerSide: true,
+    bSortClasses: false,
+    iDisplayLength: 20,
+    oLanguage: {sSearch: 'Search all columns:'},
+    sAjaxSource: 'vocabulary',
+    sDom: '<"top"ip>rt<"bottom"ip><"clear">',
+    aoColumns: [
+      {mData: 'delete', sType: 'string',
+       sWidth: '10px', bSortable: false, bSearchable: false},
+      {mData: 'italian', sType: 'string',
+       sClass: 'editable', sWidth: '20%'},
+      {mData: "english", sType: "string",
+       sClass: "editable", sWidth: "30%"},
+      {mData: "part_of_speech", sType: "string",
+       sClass: "editable", sWidth: "5%"},
+      {mData: "course", sType: "string",
+       sWidth: "15%"},
+      {mData: "tags", sType: "string",
+       sClass: "editabletags", sWidth: "20%"},
+      {mData: "wiktionary_rank", sType: "int-None",
+       sWidth: "5%", bSearchable: false},
+      {mData: "it_2012_occurrences", sType: "int-None",
+       sWidth: "5%", bSearchable: false},
     ],
-    "fnDrawCallback": function () {
+    fnDrawCallback: function() {
       // Delete (row)
       var that = this;
-      this.$('td:first-child').each(function (i) {
+      this.$('td:first-child').each(function () {
         that.fnUpdate('<form action="vocabulary" method="post" class="delete"> \
                         <button type="submit" class="fa fa-trash-o fa-lg"></button> \
                        </form>',
@@ -96,7 +86,7 @@ $(document).ready(function() {
         e.preventDefault();
 
 	var row_id = this.parentNode.parentNode.getAttribute('id');
-	var submitdata = {"row_id": row_id, "delete": true};
+	var submitdata = {row_id: row_id, delete: true};
 
 	jQuery.post('vocabulary', submitdata, function() {
 	  $('#things').dataTable().fnStandingRedraw();
@@ -104,45 +94,41 @@ $(document).ready(function() {
       });
 
       // TODO(hammer): Don't copy code here
-      // Update (no autocomplete)
+      // Update (text)
       $('#things tbody td.editable').editable('vocabulary', {
-        "callback": function(sValue, y) {
+        callback: function(sValue, y) {
 	  var oTable = $('#things').dataTable();
 	  var aPos = oTable.fnGetPosition(this);
 	  oTable.fnUpdate(sValue, aPos[0], aPos[1], false);
           oTable.fnStandingRedraw();
         },
-	"submitdata": function (value, settings) {
+	submitdata: function (value, settings) {
 	  var oTable = $('#things').dataTable();
 	  return {
-	    "row_id": this.parentNode.getAttribute('id'),
-	    "column": oTable.fnGetPosition(this)[2]
+	    row_id: this.parentNode.getAttribute('id'),
+	    column: oTable.fnGetPosition(this)[2]
 	  };
         },
-	"placeholder": ""
+	placeholder: ""
       });
 
-      // Update (autocomplete tags)
-      $('#things tbody td.editabletags').editable('vocabulary', {
-	"type": "autocomplete",
-	"autocomplete": {
-	  source: "vocabulary",
-	  autoFocus: true
-	},
-        "callback": function(sValue, y) {
-	  var oTable = $('#things').dataTable();
-	  var aPos = oTable.fnGetPosition(this);
-	  oTable.fnUpdate(sValue, aPos[0], aPos[1], false);
-          oTable.fnStandingRedraw();
-        },
-	"submitdata": function (value, settings) {
-	  var oTable = $('#things').dataTable();
-	  return {
-	    "row_id": this.parentNode.getAttribute('id'),
-	    "column": oTable.fnGetPosition(this)[2]
-	  };
-        },
-	"placeholder": ""
+      // Update (tags)
+      var that = this;
+      this.$('td.editabletags').each(function () {
+	var input = $('<input />');
+	var tags = [];
+	$(this).text().split(',').forEach(function(tag) {
+	  tags.push(tag);
+	});
+	// TODO(hammer): Find out why input.val(...) doesn't work
+	input.attr('value', tags.join(','));
+
+	var aPos = that.fnGetPosition(this);
+        that.fnUpdate(input[0].outerHTML, aPos[0], aPos[1], false, false);
+      });
+
+      this.$('td.editabletags input').tagit({
+	autocomplete: {source: 'vocabulary', autoFocus: true}
       });
     }
   });
