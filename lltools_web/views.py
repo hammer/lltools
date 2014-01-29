@@ -57,7 +57,18 @@ class Vocabulary(Resource):
       conn.commit()
       return
 
-    # Update
+    # Update (tags)
+    if request.form.get('update'):
+      tags = request.form.get('tags')
+      oid = request.form.get('row_id', type=int)
+      app.logger.info("oid: %d" % oid)
+
+      table_col_sql = 'UPDATE %s SET tags' % source_table
+      cursor.execute(table_col_sql + ' = %s WHERE oid = %s;', (tags, oid))
+      conn.commit()
+      return
+
+    # Update (text)
     oid = request.form.get('row_id', type=int)
     column = request.form.get('column', type=int)
     column_name = display_columns[column]

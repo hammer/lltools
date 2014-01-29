@@ -6,6 +6,6 @@ table th, table td { overflow: hidden; }
 div.dataTables_paginate { float: left; }
 div.dataTables_info { float: right; }
 
-div#search_things.well {
- background-color: white;
-}
+div#search_things.well { background-color: white; }
+
+ul.tagit { margin-bottom: 0px; padding: 0px 5px; }

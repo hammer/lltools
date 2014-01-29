@@ -128,7 +128,21 @@ $(document).ready(function() {
       });
 
       this.$('td.editabletags input').tagit({
-	autocomplete: {source: 'vocabulary', autoFocus: true}
+	autocomplete: {source: 'vocabulary', autoFocus: true},
+	afterTagAdded: function(event, ui) {
+	  $.post('/vocabulary', {
+	    update: true,
+	    tags: this.value,
+	    row_id: this.parentNode.parentNode.getAttribute('id')
+	  });
+	},
+	afterTagRemoved: function(event, ui) {
+	  $.post('/vocabulary', {
+	    update: true,
+	    tags: this.value,
+	    row_id: this.parentNode.parentNode.getAttribute('id')
+	  });
+	}
       });
     }
   });
