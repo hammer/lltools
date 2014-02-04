@@ -6,15 +6,19 @@ from flask.ext.restful import Resource, Api
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+from py3quizlet2 import Quizlet
+
 from lltools_web import app
 
 # Flask-RESTful object; maybe better in __init__.py?
 api = Api(app)
 
-
 # Configuration
-DATABASE_NAME = 'memrise'
+DATABASE_NAME = 'lltools'
 DEBUG = True
+Q_CLIENT_ID = os.environ['QUIZLET_CLIENT_ID']
+Q_ENCODED_AUTH_STR = os.environ['QUIZLET_ENCODED_AUTH_STR']
+Q_REDIRECT_URI = 'http://localhost:5000'
 
 
 # Helper functions for interacting with the database
@@ -37,6 +41,16 @@ def close_connection(exception):
 # Routes
 @app.route('/')
 def index():
+  q = Quizlet(Q_CLIENT_ID, Q_ENCODED_AUTH_STR, Q_REDIRECT_URI)
+
+  # Redirect user to Quizlet's permissions request
+  if not request.args:
+    auth_url, state = q.generate_auth_url('read write_set')
+    return redirect(auth_url)
+
+  # TODO(hammer): handle denial of permissions
+  q.request_token(request.args.get('code'))
+
   return render_template('index.html')
 
 
