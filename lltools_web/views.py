@@ -1,7 +1,8 @@
-from string import Template
 from distutils.util import strtobool
+import os
+from string import Template
 
-from flask import g, render_template, request
+from flask import g, render_template, redirect, request
 from flask.ext.restful import Resource, Api
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -16,9 +17,9 @@ api = Api(app)
 # Configuration
 DATABASE_NAME = 'lltools'
 DEBUG = True
-Q_CLIENT_ID = os.environ['QUIZLET_CLIENT_ID']
-Q_ENCODED_AUTH_STR = os.environ['QUIZLET_ENCODED_AUTH_STR']
-Q_REDIRECT_URI = 'http://localhost:5000'
+QUIZLET_CLIENT_ID = os.environ['QUIZLET_CLIENT_ID']
+QUIZLET_ENCODED_AUTH_STR = os.environ['QUIZLET_ENCODED_AUTH_STR']
+QUIZLET_REDIRECT_URI = 'http://localhost:5000'
 
 
 # Helper functions for interacting with the database
@@ -41,7 +42,9 @@ def close_connection(exception):
 # Routes
 @app.route('/')
 def index():
-  q = Quizlet(Q_CLIENT_ID, Q_ENCODED_AUTH_STR, Q_REDIRECT_URI)
+  q = Quizlet(QUIZLET_CLIENT_ID,
+              QUIZLET_ENCODED_AUTH_STR,
+              QUIZLET_REDIRECT_URI)
 
   # Redirect user to Quizlet's permissions request
   if not request.args:
