@@ -1,9 +1,13 @@
 #! /usr/bin/env python3
 import argparse
+from collections import namedtuple
 import configparser
+from itertools import zip_longest
 import logging
+import json
 import os
 
+import jsonpath_rw as jp
 from lxml import html
 import requests
 
@@ -11,73 +15,55 @@ import requests
 # Constants
 # JH: not sure why the CSRF token is required, but can't get logins to work without it.
 CSRFTOKEN = 'a'
-LOGIN_URL = 'http://www.memrise.com/login/'
 FIELD_SEPARATOR = '|'
 CONFIGURATION_FILE = 'memrise_scraper.ini'
-CONFIGURATION_FILE = 'memrise.com'
+CONFIGURATION_SECTION = 'memrise.com'
+LOGIN_URL = 'https://www.memrise.com/login/'
+ITALIAN_COURSES_URL = 'http://www.memrise.com/ajax/courses/dashboard/?courses_filter=learning&category_id=5'
+LEVEL_URL_BASE = 'http://www.memrise.com/ajax/level/editing_html/?level_id='
+JP_COURSES = 'courses[*].(id|name|url)'
+
+# Types
+Course = namedtuple('Course', ['id', 'url', 'name', 'levels'])
+Level = namedtuple('Level', ['id', 'name', 'terms'])
+Term = namedtuple('Term', ['italian', 'english', 'pos', 'gender'])
 
 
-def fetch_content(username, password, databases):
-  XPATH_PAGINATION = '//div[starts-with(@class, "pagination")]/ul/li/a/text()'
+# Utility functions
+# Thanks https://docs.python.org/3.5/library/itertools.html#itertools-recipes
+def grouper(iterable, n, fillvalue=None):
+  "Collect data into fixed-length chunks or blocks"
+  # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
+  args = [iter(iterable)] * n
+  return zip_longest(*args, fillvalue=fillvalue)
 
+
+# Script functions
+def fetch_content(username, password):
   login_data = dict(username=username, password=password, csrfmiddlewaretoken=CSRFTOKEN)
+  headers = {'Referer': 'https://www.memrise.com'}
   cookie_data = {'csrftoken': CSRFTOKEN}
 
   session = requests.session()
-  session.post(LOGIN_URL, data=login_data, cookies=cookie_data)
+  session.post(LOGIN_URL, data=login_data, cookies=cookie_data, headers=headers)
 
-  for database_number, database in enumerate(databases, 1):
-    page_number = 0
-    while (True):
-      page_number += 1
-      logging.info('Processing database %s, page %d' % (database, page_number))
-      req = session.get(database + '?page=%d' % page_number)
-      this_page = req.text
+  # Get Italian courses
+  req = session.get(ITALIAN_COURSES_URL)
+  courses_json = json.loads(req.text)
+  courses_data = [match.value for match in jp.parse(JP_COURSES).find(courses_json)]
+  courses = [Course(id, name, url, []) for id, name, url in grouper(courses_data, 3)]
 
-      with open('database%dpage%d.html' % (database_number, page_number), 'wt') as ofile:
-        ofile.write(this_page)
+  # Get levels for each course
 
-      # Detect if we're at the end of a database
-      if 'Next' not in html.fromstring(this_page).xpath(XPATH_PAGINATION)[-1]:
-        break
+  # Parse words from each level
 
-
-def parse_content():
-  XPATH_THINGS = '//tr[@class="thing"]'
-  XPATH_FIELDS = 'td[starts-with(@class, "cell text")]/div/div'
-
-  database_number = 0
-  while (True):
-    database_number += 1
-    page_number = 0
-    all_things = []
-    while (True):
-      page_number += 1
-      logging.info('Processing database %s, page %d' % (database_number, page_number))
-      try:
-        with open('database%dpage%d.html' % (database_number, page_number)) as infile:
-          tree = html.fromstring(infile.read())
-          things = tree.xpath(XPATH_THINGS)
-          for thing in things:
-            fields = thing.xpath(XPATH_FIELDS)
-            all_things.append([field.text if field.text else '' for field in fields])
-      except:
-        break
-
-    # Indicates that we've read the last database
-    if page_number == 1:
-      break
-
-    # TODO(hammer): escape field separator
-    with open('database%d.csv' % database_number, 'wt') as ofile:
-      ofile.write('\n'.join([FIELD_SEPARATOR.join(thing) for thing in all_things]))
+  # Flatten data and write to TSV
 
 
 if __name__ == "__main__":
   # First, look for configuration parameters in the environment
   username = os.environ.get('MEMRISE_USERNAME', '')
   password = os.environ.get('MEMRISE_PASSWORD', '')
-  databases = os.environ.get('MEMRISE_DATABASES').split(',') if os.environ.get('MEMRISE_DATABASES', False) else []
 
   # Second, look for configuration parameters in a configuration file (in this directory)
   config = configparser.ConfigParser()
@@ -86,23 +72,20 @@ if __name__ == "__main__":
     config_dict = config[CONFIGURATION_SECTION]
     username = config_dict.get('username', username)
     password = config_dict.get('password', password)
-    databases = config_dict.get('databases').split(',') if config_dict.get('databases', False) else databases
 
   # Third, look for configuration parameters on the command line
   parser = argparse.ArgumentParser(description='Scrape vocabulary from Memrise.')
   parser.add_argument('-u', '--username')
   parser.add_argument('-p', '--password')
-  parser.add_argument('-d', '--databases', nargs='+')
   parser.add_argument('-v', '--verbose', action='store_true')
   args = parser.parse_args()
   if args.username is not None: username = args.username
   if args.password is not None: password = args.password
-  if args.databases is not None: databases = args.databases.split(',')
   if args.verbose: logging.basicConfig(level=logging.DEBUG)
 
   # Do some work
-  logging.info('Fetching content with username %s, password %s, and databases %s' % (username, password, databases))
-  fetch_content(username, password, databases)
+  logging.info('Fetching content for username %s with password %s' % (username, password))
+  fetch_content(username, password)
   parse_content()
 
 
